@@ -3,42 +3,36 @@ const mysql = require('mysql2/promise');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Support DATABASE_URL (Render) or individual variables
-let dbConfig;
-
-if (process.env.DATABASE_URL) {
-  // Use DATABASE_URL if provided (Render deployment)
-  dbConfig = process.env.DATABASE_URL;
-  console.log('🔍 Using DATABASE_URL for connection');
-} else {
-  // Use individual environment variables (local development)
-  dbConfig = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    connectTimeout: 60000,
-    ssl: isProduction ? { rejectUnauthorized: false } : undefined
-  };
-  
-  console.log('🔍 MySQL Config:', {
-    host: dbConfig.host,
-    port: dbConfig.port,
-    user: dbConfig.user,
-    database: dbConfig.database,
-    ssl: !!dbConfig.ssl
-  });
-}
-
 let pool;
 
 async function initializeDatabase() {
   try {
-    pool = mysql.createPool(dbConfig);
+    // Support DATABASE_URL (Render) or individual variables
+    if (process.env.DATABASE_URL) {
+      console.log('✅ Using DATABASE_URL for connection');
+      pool = mysql.createPool({
+        uri: process.env.DATABASE_URL,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        connectTimeout: 60000,
+        ssl: { rejectUnauthorized: false }
+      });
+    } else {
+      console.log('⚠️ Using individual DB variables');
+      pool = mysql.createPool({
+        host: process.env.DB_HOST,
+        port: process.env.DB_PORT || 3306,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        connectTimeout: 60000,
+        ssl: isProduction ? { rejectUnauthorized: false } : undefined
+      });
+    }
     
     const connection = await pool.getConnection();
     console.log('✅ MySQL connected');
