@@ -6,11 +6,14 @@ const { initializeDatabase } = require('./config/database');
 const { attachUser } = require('./middleware/auth');
 
 const app = express();
-const PORT = parseInt(process.env.PORT) || 8080;
+// Railway provides PORT, fallback to 8080 for local
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
 console.log('🔍 Environment:', process.env.NODE_ENV);
-console.log('🔍 Port from env:', process.env.PORT);
-console.log('🔍 Port to use:', PORT);
+console.log('🔍 PORT env variable:', process.env.PORT);
+console.log('🔍 PORT type:', typeof process.env.PORT);
+console.log('🔍 Final PORT to use:', PORT);
+console.log('🔍 PORT type after parse:', typeof PORT);
 
 /* -------------------- CORS (PRODUCTION SAFE) -------------------- */
 const allowedOrigins = [
