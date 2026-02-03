@@ -6,7 +6,9 @@ const { initializeDatabase } = require('./config/database');
 const { attachUser } = require('./middleware/auth');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
+
+console.log('🔍 Starting server on port:', PORT);
 
 /* -------------------- CORS (PRODUCTION SAFE) -------------------- */
 const allowedOrigins = [
