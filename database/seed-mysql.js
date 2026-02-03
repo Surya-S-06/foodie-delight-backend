@@ -13,40 +13,15 @@ async function seedDatabase() {
       return;
     }
 
-    console.log('📦 Seeding database with Madurai hotels and food items...');
+    console.log('📦 Seeding database with Konar Mess and food items...');
 
     await connection.beginTransaction();
 
-    // Insert hotels
-    const hotelData = [
-      ['Konar Mess - Simmakkal', 'Anna Nagar', 'non-veg', 4.5],
-      ['Murugan Idli Shop', 'West Masi Street', 'veg', 4.7],
-      ['Famous Jigarthanda', 'Teppakulam', 'snacks', 4.9],
-      ['Amsavalli Bhavan', 'Goripalayam', 'both', 4.2],
-      ['Kumar Mess', 'SS Colony', 'non-veg', 4.6],
-      ['Sree Sabarees', 'West Masi Street', 'veg', 4.4],
-      ['Amma Mess', 'Bypass Road', 'veg', 4.3],
-      ['New Arya Bhavan', 'Town Hall Road', 'veg', 4.5],
-      ['Madurai Idly Shop', 'Tallakulam', 'veg', 4.8],
-      ['Meenakshi Bhavan', 'Periyar Bus Stand', 'veg', 4.1],
-      ['Anjappar Chettinad', 'Bypass Road', 'non-veg', 4.7],
-      ['Konaar Kadai', 'Simmakkal', 'non-veg', 4.6],
-      ['Surya Sweets', 'Town Hall', 'veg', 4.4],
-      ['Gowri Shankar Hotel', 'Periyar', 'veg', 4.3],
-      ['Kannappa Chettinad', 'Bypass', 'non-veg', 4.5],
-      ['Sri Saravana Bhavan', 'Anna Nagar', 'veg', 4.6],
-      ['Madurai Kumar Mess', 'Simmakkal', 'non-veg', 4.7],
-      ['Jigarthanda Stall', 'Vilakkuthoon', 'snacks', 4.8],
-      ['Bun Parotta Kadai', 'Teppakulam', 'both', 4.5],
-      ['Madurai Mess', 'Goripalayam', 'non-veg', 4.4]
-    ];
-
-    for (const hotel of hotelData) {
-      await connection.query(
-        'INSERT INTO hotels (name, location, type, rating) VALUES (?, ?, ?, ?)',
-        hotel
-      );
-    }
+    // Insert single restaurant - Konar Mess
+    await connection.query(
+      'INSERT INTO hotels (name, location, type, rating) VALUES (?, ?, ?, ?)',
+      ['Konar Mess', 'Madurai', 'both', 4.5]
+    );
 
     // Insert food items
     const foodData = [
@@ -95,23 +70,15 @@ async function seedDatabase() {
       );
     }
 
-    // Map food items to hotels (simplified - all hotels serve all items of their type)
-    const [allHotels] = await connection.query('SELECT id, type FROM hotels');
-    const [allFoods] = await connection.query('SELECT id, type FROM food_items');
+    // Map all food items to Konar Mess
+    const [hotel] = await connection.query('SELECT id FROM hotels LIMIT 1');
+    const [allFoods] = await connection.query('SELECT id FROM food_items');
 
-    for (const hotel of allHotels) {
-      for (const food of allFoods) {
-        // Map based on type compatibility
-        if (hotel.type === 'both' || 
-            hotel.type === 'snacks' ||
-            food.type === 'beverage' ||
-            hotel.type === food.type) {
-          await connection.query(
-            'INSERT IGNORE INTO hotel_food (hotel_id, food_id) VALUES (?, ?)',
-            [hotel.id, food.id]
-          );
-        }
-      }
+    for (const food of allFoods) {
+      await connection.query(
+        'INSERT IGNORE INTO hotel_food (hotel_id, food_id) VALUES (?, ?)',
+        [hotel[0].id, food.id]
+      );
     }
 
     await connection.commit();
