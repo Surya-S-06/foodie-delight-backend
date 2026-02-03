@@ -49,7 +49,11 @@ app.use(session({
 
 /* -------------------- HEALTH CHECK -------------------- */
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ status: 'ok', port: PORT });
+});
+
+app.get('/', (_req, res) => {
+  res.status(200).json({ message: 'Foodie Delight API', status: 'running' });
 });
 
 /* -------------------- AUTH MIDDLEWARE -------------------- */
