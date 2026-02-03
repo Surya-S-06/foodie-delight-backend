@@ -209,7 +209,8 @@ async function seedDefaultData() {
 
     const [hotels] = await connection.query('SELECT COUNT(*) as count FROM hotels');
     
-    if (hotels[0].count === 0 && !isProduction) {
+    if (hotels[0].count === 0) {
+      console.log('🌱 No data found, seeding database...');
       const { seedDatabase } = require('../database/seed-mysql');
       await seedDatabase();
     }
