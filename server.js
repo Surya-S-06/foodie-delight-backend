@@ -6,10 +6,11 @@ const { initializeDatabase } = require('./config/database');
 const { attachUser } = require('./middleware/auth');
 
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = parseInt(process.env.PORT) || 8080;
 
 console.log('🔍 Environment:', process.env.NODE_ENV);
-console.log('🔍 Port:', PORT);
+console.log('🔍 Port from env:', process.env.PORT);
+console.log('🔍 Port to use:', PORT);
 
 /* -------------------- CORS (PRODUCTION SAFE) -------------------- */
 const allowedOrigins = [
