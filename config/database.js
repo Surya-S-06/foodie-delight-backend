@@ -193,26 +193,16 @@ async function seedDefaultData() {
   const connection = await pool.getConnection();
   
   try {
-    const [admins] = await connection.query('SELECT COUNT(*) as count FROM admins');
-    
-    if (admins[0].count === 0) {
-      const bcrypt = require('bcrypt');
-      const hashedPassword = await bcrypt.hash('admin123', 10);
-      
-      await connection.query(
-        'INSERT INTO admins (username, password_hash) VALUES (?, ?)',
-        ['admin', hashedPassword]
-      );
-      
-      console.log('✅ Admin created');
-    }
-
+    // Always check and seed if needed
     const [hotels] = await connection.query('SELECT COUNT(*) as count FROM hotels');
+    const [foods] = await connection.query('SELECT COUNT(*) as count FROM food_items');
     
-    if (hotels[0].count === 0) {
-      console.log('🌱 No data found, seeding database...');
+    if (hotels[0].count === 0 || foods[0].count === 0) {
+      console.log('🌱 Seeding database...');
       const { seedDatabase } = require('../database/seed-mysql');
       await seedDatabase();
+    } else {
+      console.log('✅ Database already has data');
     }
   } catch (error) {
     console.error('⚠️ Seeding error:', error.message);
