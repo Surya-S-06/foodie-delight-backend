@@ -2,18 +2,20 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const session = require('express-session');
-const { initializeDatabase } = require('./config/database');
-const { attachUser } = require('./middleware/auth');
 
 const app = express();
 // Railway provides PORT, fallback to 8080 for local
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
 
-console.log('🔍 Environment:', process.env.NODE_ENV);
-console.log('🔍 PORT env variable:', process.env.PORT);
-console.log('🔍 PORT type:', typeof process.env.PORT);
-console.log('🔍 Final PORT to use:', PORT);
-console.log('🔍 PORT type after parse:', typeof PORT);
+console.log('========================================');
+console.log('🔍 STARTUP DIAGNOSTICS');
+console.log('========================================');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('PORT env variable:', process.env.PORT);
+console.log('PORT type:', typeof process.env.PORT);
+console.log('Final PORT to use:', PORT);
+console.log('PORT type after parse:', typeof PORT);
+console.log('========================================');
 
 /* -------------------- CORS (PRODUCTION SAFE) -------------------- */
 const allowedOrigins = [
@@ -23,7 +25,8 @@ const allowedOrigins = [
   'https://foodie-delight-online.vercel.app'
 ].filter(Boolean);
 
-console.log('🔍 Allowed origins:', allowedOrigins);
+console.log('Allowed origins:', allowedOrigins);
+console.log('========================================');
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -58,18 +61,26 @@ app.use(session({
 }));
 
 /* -------------------- HEALTH CHECK (BEFORE MIDDLEWARE) -------------------- */
+console.log('Setting up health check routes...');
 app.get('/health', (_req, res) => {
+  console.log('Health check requested');
   res.status(200).json({ status: 'ok', port: PORT, timestamp: new Date().toISOString() });
 });
 
 app.get('/', (_req, res) => {
+  console.log('Root endpoint requested');
   res.status(200).json({ message: 'Foodie Delight API', status: 'running', port: PORT });
 });
+console.log('Health check routes configured');
 
 /* -------------------- AUTH MIDDLEWARE -------------------- */
+console.log('Loading auth middleware...');
+const { attachUser } = require('./middleware/auth');
 app.use(attachUser);
+console.log('Auth middleware loaded');
 
 /* -------------------- START SERVER -------------------- */
+console.log('Loading routes...');
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/hotels', require('./routes/hotels'));
 app.use('/api/food', require('./routes/food'));
@@ -77,12 +88,19 @@ app.use('/api/cart', require('./routes/cart'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/bills', require('./routes/bills'));
 app.use('/api/admin', require('./routes/admin'));
+console.log('All routes loaded');
 
 // Start server FIRST
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+console.log(`Attempting to start server on port ${PORT}...`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log('========================================');
+  console.log(`🚀 SERVER SUCCESSFULLY STARTED`);
+  console.log(`🚀 Listening on port ${PORT}`);
+  console.log(`🚀 Address: 0.0.0.0:${PORT}`);
+  console.log('========================================');
   
   // Initialize DB AFTER server is live
+  const { initializeDatabase } = require('./config/database');
   initializeDatabase()
     .then(() => {
       console.log('✅ Database initialized');
@@ -97,6 +115,12 @@ app.listen(PORT, '0.0.0.0', () => {
       console.error(err.message);
       // DO NOT exit process
     });
+});
+
+server.on('error', (error) => {
+  console.error('========================================');
+  console.error('❌ SERVER ERROR:', error);
+  console.error('========================================');
 });
 
 process.on('unhandledRejection', (reason) => {
