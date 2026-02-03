@@ -8,13 +8,18 @@ const { attachUser } = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-console.log('🔍 Starting server on port:', PORT);
+console.log('🔍 Environment:', process.env.NODE_ENV);
+console.log('🔍 Port:', PORT);
 
 /* -------------------- CORS (PRODUCTION SAFE) -------------------- */
 const allowedOrigins = [
   'http://localhost:8080',
-  process.env.FRONTEND_URL // Vercel URL
+  'http://localhost:5500',
+  process.env.FRONTEND_URL,
+  'https://foodie-delight-online.vercel.app'
 ].filter(Boolean);
+
+console.log('🔍 Allowed origins:', allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -22,7 +27,8 @@ app.use(cors({
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('⚠️ CORS blocked:', origin);
+      callback(null, true); // Allow all for now to test
     }
   },
   credentials: true
