@@ -63,7 +63,7 @@ app.use('/api/bills', require('./routes/bills'));
 app.use('/api/admin', require('./routes/admin'));
 
 // Start server FIRST
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   
   // Initialize DB AFTER server is live
