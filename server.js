@@ -57,13 +57,13 @@ app.use(session({
   }
 }));
 
-/* -------------------- HEALTH CHECK -------------------- */
+/* -------------------- HEALTH CHECK (BEFORE MIDDLEWARE) -------------------- */
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', port: PORT });
+  res.status(200).json({ status: 'ok', port: PORT, timestamp: new Date().toISOString() });
 });
 
 app.get('/', (_req, res) => {
-  res.status(200).json({ message: 'Foodie Delight API', status: 'running' });
+  res.status(200).json({ message: 'Foodie Delight API', status: 'running', port: PORT });
 });
 
 /* -------------------- AUTH MIDDLEWARE -------------------- */
@@ -101,11 +101,15 @@ app.listen(PORT, '0.0.0.0', () => {
 
 process.on('unhandledRejection', (reason) => {
   console.error('⚠️ Unhandled Rejection:', reason);
+  // Don't exit - log and continue
 });
 
 process.on('uncaughtException', (error) => {
   console.error('⚠️ Uncaught Exception:', error);
-  process.exit(1);
+  // Don't exit in production - Railway will restart if needed
+  if (process.env.NODE_ENV !== 'production') {
+    process.exit(1);
+  }
 });
 
 /* -------------------- AUTO AVAILABILITY -------------------- */

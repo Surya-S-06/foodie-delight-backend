@@ -40,9 +40,10 @@ async function attachUser(req, res, next) {
       }
     } catch (error) {
       console.error('Error attaching user:', error);
+      // Don't block the request if DB fails
     }
   }
-  next();
+  next(); // Always call next, even if there's an error
 }
 
 module.exports = {
